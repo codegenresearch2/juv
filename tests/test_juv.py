@@ -27,17 +27,17 @@ def invoke(args: list[str], uv_python: str = "3.13") -> Result:
 
 @pytest.fixture
 def sample_script() -> str:
-    return """
-# /// script
-# dependencies = ["numpy", "pandas"]
-# requires-python = ">=3.8"
-# ///
-
-import numpy as np
-import pandas as pd
-
-print('Hello, world!')
-"""
+    return '''
+    # /// script
+    # dependencies = ["numpy", "pandas"]
+    # requires-python = ">=3.8"
+    # ///
+    
+    import numpy as np
+    import pandas as pd
+    
+    print('Hello, world!')
+    '''
 
 
 @pytest.fixture
@@ -74,16 +74,17 @@ def filter_ids(output: str) -> str:
 def test_to_notebook_script(tmp_path: pathlib.Path):
     script = tmp_path / "script.py"
     script.write_text("""
-# /// script
-# dependencies = ["numpy"]
-# requires-python = ">=3.8"
-# ///
-
-
-import numpy as np
-
-# %%\nprint('Hello, numpy!')\narr = np.array([1, 2, 3])
-""")
+    # /// script
+    # dependencies = ["numpy"]
+    # requires-python = ">=3.8"
+    # ///
+    
+    
+    import numpy as np
+    
+    # %%
+    print('Hello, numpy!')\narr = np.array([1, 2, 3])
+    """)
 
     meta, nb = to_notebook(script)
     output = jupytext.writes(nb, fmt="ipynb")
@@ -94,7 +95,9 @@ import numpy as np
 dependencies = ["numpy"]
 requires-python = ">=3.8"
 """,
-        "{\n \"cells\": [\n  {}\n  {}\n  {}\n ],\n \"metadata\": {\n  \"jupytext\": {\n   \"cell_metadata_filter\": "-all",\n   \"main_language\": \"python\",\n   \"notebook_metadata_filter\": "-all"\n  }\n },\n \"nbformat\": 4,\n \"nbformat_minor\": 5\n}"
+        "{\n \"cells\": [\n  {}\n  {}\n  {}\n ],\n \"metadata\": {\n  \"jupytext\": {\n   \"cell_metadata_filter\": '-all',
+   \"main_language\": 'python',
+   \"notebook_metadata_filter\": '-all'\n  }\n },\n \"nbformat\": 4,\n \"nbformat_minor\": 5\n}"
     ))
 
 
@@ -113,8 +116,8 @@ def test_python_override() -> None:
         python="3.12",
     ) == snapshot([
         "--from=jupyter-core",
-        "--with=setuptools", "--with", "polars",
-        "--python", "3.12", "--with=numpy", "--with=nbclassic", "jupyter",
+        "--with=setuptools", "--with polars",
+        "--python 3.12", "--with=numpy", "--with=nbclassic", "jupyter",
         "nbclassic",
         "test.ipynb",
     ])
@@ -129,7 +132,7 @@ def test_run_nbclassic() -> None:
         with_args=["polars"],
     ) == snapshot([
         "--from=jupyter-core",
-        "--with=setuptools", "--with", "polars", "--python=3.8",
+        "--with=setuptools", "--with polars", "--python 3.8",
         "--with=numpy",
         "--with=nbclassic", "jupyter",
         "nbclassic",
@@ -147,7 +150,7 @@ def test_run_notebook() -> None:
     ) == snapshot([
         "--from=jupyter-core",
         "--with=setuptools",
-        "--with=notebook==6.4.0",
+        "--with notebook==6.4.0",
         "jupyter",
         "notebook",
         "test.ipynb",
@@ -163,7 +166,7 @@ def test_run_jlab() -> None:
         with_args=["polars", "altair"],
     ) == snapshot([
         "--from=jupyter-core",
-        "--with=setuptools", "--with", "polars", "altair", "--python=3.8",
+        "--with=setuptools", "--with polars", "altair", "--python 3.8",
         "--with=numpy",
         "--with=jupyterlab", "jupyter",
         "lab",
@@ -173,8 +176,8 @@ def test_run_jlab() -> None:
 
 def filter_tempfile_ipynb(output: str) -> str:
     """Replace the temporary directory in the output with <TEMPDIR> for snapshotting."""
-    pattern = r"`([^`\n]+\n?[^`\n]+/)([^/\n]+\.ipynb)`"
-    replacement = r"`<TEMPDIR>/\2`"
+    pattern = r'`([^`\n]+\n?[^`\n]+/)([^/\n]+\.ipynb)`'
+    replacement = r'`<TEMPDIR>/\2`'
     return re.sub(pattern, replacement, output)
 
 
@@ -210,13 +213,13 @@ def test_add_updates_existing_meta(tmp_path: pathlib.Path) -> None:
     nb = new_notebook(
         cells=[
             new_code_cell("""
-# /// script
-# dependencies = ["numpy"]
-# requires-python = ">=3.8"
-# ///
-import numpy as np
-print('Hello, numpy!')
-""")
+            # /// script
+            # dependencies = ["numpy"]
+            # requires-python = ">=3.8"
+            # ///
+            import numpy as np
+            print('Hello, numpy!')
+            """)
         ]
     )
     write_ipynb(nb, path)
