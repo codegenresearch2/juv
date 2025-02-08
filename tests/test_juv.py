@@ -27,7 +27,7 @@ def invoke(args: list[str], uv_python: str = '3.13') -> Result:
 
 @pytest.fixture
 def sample_script() -> str:
-    return '''
+    return """
     # /// script
     # dependencies = ['numpy', 'pandas']
     # requires-python = '>=3.8'
@@ -37,7 +37,7 @@ def sample_script() -> str:
     import pandas as pd
     
     print('Hello, world!')
-    '''
+    """
 
 
 @pytest.fixture
@@ -46,7 +46,7 @@ def sample_notebook() -> dict:
         'cells': [
             {
                 'cell_type': 'code',
-                'source': '# /// script\n# dependencies = ["pandas"]\n# ///\n\nimport pandas as pd\nprint(\"Hello, pandas!\")',
+                'source': '# /// script\n# dependencies = ["pandas"]\n# ///\n\nimport pandas as pd\nprint("Hello, pandas!")',
             }
         ],
         'nbformat': 4,
@@ -63,12 +63,12 @@ def test_parse_pep723_meta(sample_script: str) -> None:
 
 
 def test_parse_pep723_meta_no_meta() -> None:
-    script_without_meta = 'print(\"Hello, world!\")'
+    script_without_meta = 'print("Hello, world!")'
     assert parse_inline_script_metadata(script_without_meta) is None
 
 
 def filter_ids(output: str) -> str:
-    return re.sub(r'\"id\": \"[a-zA-Z0-9-]+\"', '\"id\": \'<ID>\"', output)
+    return re.sub(r'"id": "[a-zA-Z0-9-]+"', '"id": '<ID>"', output)
 
 
 def test_to_notebook_script(tmp_path: pathlib.Path):
@@ -82,7 +82,8 @@ def test_to_notebook_script(tmp_path: pathlib.Path):
     
     import numpy as np
     
-    # %%\n    print('Hello, numpy!')\narr = np.array([1, 2, 3])
+    # %%
+    print('Hello, numpy!')\narr = np.array([1, 2, 3])
     """)
 
     meta, nb = to_notebook(script)
@@ -93,14 +94,13 @@ def test_to_notebook_script(tmp_path: pathlib.Path):
         """
         dependencies = ['numpy']
         requires-python = '>=3.8'
-        """,
         """
-        {\n         'cells': [
-          {}\n          {}\n          {}\n         ],\n         'metadata': {\n          'jupytext': {\n           'cell_metadata_filter': '-all',
+        ,
+        """
+        {\n         'cells': [\n          {}\n          {}\n          {}\n         ],\n         'metadata': {\n          'jupytext': {\n           'cell_metadata_filter': '-all',
            'main_language': 'python',
            'notebook_metadata_filter': '-all'
-          }
-         },\n         'nbformat': 4,\n         'nbformat_minor': 5\n        }"""
+          }\n         },\n         'nbformat': 4,\n         'nbformat_minor': 5\n        }"""
     ))
 
 
@@ -179,8 +179,12 @@ def test_run_jlab() -> None:
 
 def filter_tempfile_ipynb(output: str) -> str:
     """Replace the temporary directory in the output with <TEMPDIR> for snapshotting."""
-    pattern = r'`([^`\n]+\n?[^`\n]+/)([^/\n]+\.ipynb)`'
-    replacement = r'`<TEMPDIR>/"""2`'
+    pattern = r'`([^`
+]+
+?[^`
+]+/)([^/
+]+\.ipynb)`'
+    replacement = r'`<TEMPDIR>/\2`'
     return re.sub(pattern, replacement, output)
 
 
@@ -194,20 +198,14 @@ def test_add_creates_inline_meta(tmp_path: pathlib.Path) -> None:
     `<TEMPDIR>/foo.ipynb`
     """)
     assert filter_ids(nb.read_text()) == snapshot("""
-    {
-     'cells': [
-      {}
-     ],
-     'metadata': {}, 
-     'nbformat': 4,
-     'nbformat_minor': 5
-    }""")
+    {\n     'cells': [\n      {}\n     ],\n     'metadata': {}, 
+     'nbformat': 4,\n     'nbformat_minor': 5\n    }""")
 
 
 def test_add_prepends_script_meta(tmp_path: pathlib.Path) -> None:
     path = tmp_path / 'empty.ipynb'
     write_ipynb(
-        new_notebook(cells=[new_code_cell('print(\"Hello, world!\")')]), path,
+        new_notebook(cells=[new_code_cell('print("Hello, world!")')]), path,
     )
     result = invoke(['add', str(path), 'polars==1', 'anywidget'])
     assert result.exit_code == 0
@@ -216,15 +214,8 @@ def test_add_prepends_script_meta(tmp_path: pathlib.Path) -> None:
     `<TEMPDIR>/empty.ipynb`
     """)
     assert filter_ids(path.read_text()) == snapshot("""
-    {
-     'cells': [
-      {}
-      {}
-     ],
-     'metadata': {}, 
-     'nbformat': 4,
-     'nbformat_minor': 5
-    }""")
+    {\n     'cells': [\n      {}\n      {}\n     ],\n     'metadata': {}, 
+     'nbformat': 4,\n     'nbformat_minor': 5\n    }""")
 
 
 def test_add_updates_existing_meta(tmp_path: pathlib.Path) -> None:
@@ -249,15 +240,8 @@ def test_add_updates_existing_meta(tmp_path: pathlib.Path) -> None:
     `<TEMPDIR>/empty.ipynb`
     """)
     assert filter_ids(path.read_text()) == snapshot("""
-    {
-     'cells': [
-      {}
-      {}
-     ],
-     'metadata': {}, 
-     'nbformat': 4,
-     'nbformat_minor': 5
-    }""")
+    {\n     'cells': [\n      {}\n      {}\n     ],\n     'metadata': {}, 
+     'nbformat': 4,\n     'nbformat_minor': 5\n    }""")
 
 
 def test_init_creates_notebook_with_inline_meta(tmp_path: pathlib.Path) -> None:
@@ -269,14 +253,8 @@ def test_init_creates_notebook_with_inline_meta(tmp_path: pathlib.Path) -> None:
     `<TEMPDIR>/empty.ipynb`
     """)
     assert filter_ids(path.read_text()) == snapshot("""
-    {
-     'cells': [
-      {}
-     ],
-     'metadata': {}, 
-     'nbformat': 4,
-     'nbformat_minor': 5
-    }""")
+    {\n     'cells': [\n      {}\n     ],\n     'metadata': {}, 
+     'nbformat': 4,\n     'nbformat_minor': 5\n    }""")
 
 
 def test_init_creates_notebook_with_specific_python_version(tmp_path: pathlib.Path) -> None:
@@ -288,11 +266,5 @@ def test_init_creates_notebook_with_specific_python_version(tmp_path: pathlib.Pa
     `<TEMPDIR>/empty.ipynb`
     """)
     assert filter_ids(path.read_text()) == snapshot("""
-    {
-     'cells': [
-      {}
-     ],
-     'metadata': {}, 
-     'nbformat': 4,
-     'nbformat_minor': 5
-    }""")
+    {\n     'cells': [\n      {}\n     ],\n     'metadata': {}, 
+     'nbformat': 4,\n     'nbformat_minor': 5\n    }""")
