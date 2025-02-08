@@ -1,1 +1,1 @@
-def test_function():\n    assert some_condition == expected_result
+import tempfile"
