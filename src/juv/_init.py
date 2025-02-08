@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 import tempfile
 import subprocess
-import typing
 import sys
 
 import rich
@@ -39,7 +38,7 @@ def new_notebook_with_inline_metadata(dir: Path, python: str | None = None) -> d
             cmd.extend(["--python", python])
         cmd.extend(["--script", f.name])
 
-        subprocess.run(cmd)
+        subprocess.run(cmd, check=True)
         f.seek(0)
         contents = f.read().strip()
         notebook = new_notebook(cells=[code_cell(contents, hidden=True)])
@@ -58,11 +57,7 @@ def get_first_non_conflicting_untitled_ipynb(dir: Path) -> Path:
     raise ValueError("Could not find an available UntitledX.ipynb")
 
 
-def init(
-    path: Path | None,
-    python: str | None,
-    packages: typing.Sequence[str] = [],
-) -> None:
+def init(path: Path | None, python: str | None) -> None:
     """Initialize a new notebook."""
     if not path:
         path = get_first_non_conflicting_untitled_ipynb(Path.cwd())
@@ -73,10 +68,5 @@ def init(
 
     notebook = new_notebook_with_inline_metadata(path.parent, python)
     write_ipynb(notebook, path)
-
-    if len(packages) > 0:
-        from ._add import add
-
-        add(path=path, packages=packages, requirements=None)
 
     rich.print(f"Initialized notebook at `[cyan]{path.resolve().absolute()}[/cyan]`")
