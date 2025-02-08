@@ -34,7 +34,7 @@ def new_notebook_with_inline_metadata(dir: Path, python: str | None = None) -> d
         dir=dir,
     ) as f:
         cmd = ['uv', 'init', '--quiet']
-        if python:
+        if python:  
             cmd.extend(['--python', python])
         cmd.extend(['--script', f.name])
 
