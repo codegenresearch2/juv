@@ -1,1 +1,1 @@
-import pytest"
+import pytest\\nimport os\\nfrom pathlib import Path\\nimport re\\nfrom unittest.mock import patch\\nimport pathlib\\nimport sys\\nfrom rich import print\\nfrom juv import cli, assert_uv_available\\nfrom juv._nbconvert import write_ipynb, code_cell\\nfrom juv._pep723 import parse_inline_script_metadata\\nfrom click.testing import CliRunner, Result\\n
