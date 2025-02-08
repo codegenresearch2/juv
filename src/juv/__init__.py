@@ -69,20 +69,21 @@ def cli():
     run(path=Path(file), jupyter=jupyter, python=python, with_args=with_args)
 
 
-def upgrade_legacy_jupyter_command(args: list[str]) -> None:
-    """Check legacy lab/notebook/nbclassic command usage and upgrade to 'run' with deprecation notice."
-    for i, arg in enumerate(args):
-        if i == 0:  # Skip the first argument which is the script name
-            continue
-        if arg.startswith(('lab', 'notebook', 'nbclassic')) and not args[i - 1].startswith('--') and not arg.startswith('--'):
-            rich.print(
-                f'\[bold]Warning:[/bold] The command \'{arg}\' is deprecated. ',  # Corrected the escape sequence for bold text
-                f'Please use \'run\' with `--jupyter={arg}` or set JUV_JUPYTER={arg}',
-            )
-            os.environ['JUV_JUPYTER'] = arg
-            args[i] = 'run'
+def assert_uv_available():
+    """Check if the 'uv' command is available."
+    if shutil.which('uv') is None:
+        rich.print('Error: \'uv\' command not found.', file=sys.stderr)
+        rich.print(
+            'Please install \'uv\' to run `juv`.',
+            file=sys.stderr
+        )
+        rich.print(
+            'For more information, visit: https://github.com/astral-sh/uv',
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
 
 def main():
-    upgrade_legacy_jupyter_command(sys.argv)
+    assert_uv_available()
     cli()
