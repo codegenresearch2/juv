@@ -39,7 +39,7 @@ def new_notebook_with_inline_metadata(dir: Path, python: str | None = None) -> d
             cmd.extend(['--python', python])
         cmd.extend(['--script', f.name])
 
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd)
         f.seek(0)
         contents = f.read().strip()
         notebook = new_notebook(cells=[code_cell(contents, hidden=True)])
@@ -58,7 +58,7 @@ def get_first_non_conflicting_untitled_ipynb(dir: Path) -> Path:
     raise ValueError('Could not find an available UntitledX.ipynb')
 
 
-def init(path: Path | None, python: str | None, packages: typing.Sequence[str] = ()) -> None:
+def init(path: Path | None, python: str | None, packages: list[str] = []) -> None:
     """Initialize a new notebook."""
     if not path:
         path = get_first_non_conflicting_untitled_ipynb(Path.cwd())
