@@ -8,6 +8,7 @@ import sys
 import rich
 
 from ._nbconvert import new_notebook, code_cell, write_ipynb
+from ._add import add
 
 
 def new_notebook_with_inline_metadata(dir: Path, python: str | None = None) -> dict:
@@ -57,7 +58,7 @@ def get_first_non_conflicting_untitled_ipynb(dir: Path) -> Path:
     raise ValueError("Could not find an available UntitledX.ipynb")
 
 
-def init(path: Path | None, python: str | None) -> None:
+def init(path: Path | None, python: str | None, packages: list[str] | None = None) -> None:
     """Initialize a new notebook."""
     if not path:
         path = get_first_non_conflicting_untitled_ipynb(Path.cwd())
@@ -68,5 +69,8 @@ def init(path: Path | None, python: str | None) -> None:
 
     notebook = new_notebook_with_inline_metadata(path.parent, python)
     write_ipynb(notebook, path)
+
+    if packages:
+        add(path, packages)
 
     rich.print(f"Initialized notebook at `[cyan]{path.resolve().absolute()}[/cyan]`")
