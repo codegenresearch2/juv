@@ -9,6 +9,7 @@ import shutil
 import rich
 
 
+
 def assert_uv_available():
     if shutil.which('uv') is None:
         rich.print('Error: \'uv\' command not found.', file=sys.stderr)
