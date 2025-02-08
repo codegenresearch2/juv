@@ -56,7 +56,10 @@ def sample_notebook() -> dict:
 
 def test_parse_pep723_meta(sample_script: str) -> None:
     meta = parse_inline_script_metadata(sample_script)
-    assert meta == snapshot("""\ndependencies = ["numpy", "pandas"]\nrequires-python = ">=3.8"\n""")
+    assert meta == snapshot("""
+dependencies = ["numpy", "pandas"]
+requires-python = ">=3.8"
+""")
 
 
 def test_parse_pep723_meta_no_meta() -> None:
@@ -70,7 +73,8 @@ def filter_ids(output: str) -> str:
 
 def test_to_notebook_script(tmp_path: pathlib.Path):
     script = tmp_path / "script.py"
-    script.write_text("""# /// script
+    script.write_text("""
+# /// script
 # dependencies = ["numpy"]
 # requires-python = ">=3.8"
 # ///
@@ -78,16 +82,20 @@ def test_to_notebook_script(tmp_path: pathlib.Path):
 
 import numpy as np
 
-# %%\nprint('Hello, numpy!')\narr = np.array([1, 2, 3])"""")
+# %%\nprint('Hello, numpy!')\narr = np.array([1, 2, 3])
+""")
 
     meta, nb = to_notebook(script)
     output = jupytext.writes(nb, fmt="ipynb")
     output = filter_ids(output)
 
     assert (meta, output) == snapshot((
-        """\ndependencies = ["numpy"]\nrequires-python = ">=3.8"\n""",
-        """{\n "cells": [\n  {}\n  {}\n  {}\n ],\n "metadata": {\n  "jupytext": {\n   "cell_metadata_filter": "-all",\n   "main_language": "python",\n   "notebook_metadata_filter": "-all"\n  }\n },\n "nbformat": 4,\n "nbformat_minor": 5\n}\n""",
-    )))
+        """
+dependencies = ["numpy"]
+requires-python = ">=3.8"
+""",
+        "{\n \"cells\": [\n  {}\n  {}\n  {}\n ],\n \"metadata\": {\n  \"jupytext\": {\n   \"cell_metadata_filter\": "-all",\n   \"main_language\": \"python\",\n   \"notebook_metadata_filter\": "-all"\n  }\n },\n \"nbformat\": 4,\n \"nbformat_minor\": 5\n}"
+    ))
 
 
 def test_assert_uv_available() -> None:
@@ -152,10 +160,10 @@ def test_run_jlab() -> None:
         runtime=Runtime("lab", None),
         pep723_meta=Pep723Meta(dependencies=["numpy"], requires_python="3.8"),
         python=None,
-        with_args=["polars,altair"],
+        with_args=["polars", "altair"],
     ) == snapshot([
         "--from=jupyter-core",
-        "--with=setuptools", "--with", "polars,altair", "--python=3.8",
+        "--with=setuptools", "--with", "polars", "altair", "--python=3.8",
         "--with=numpy",
         "--with=jupyterlab", "jupyter",
         "lab",
@@ -175,8 +183,11 @@ def test_add_creates_inline_meta(tmp_path: pathlib.Path) -> None:
     write_ipynb(new_notebook(), nb)
     result = invoke(["add", str(nb), "polars==1", "anywidget"])
     assert result.exit_code == 0
-    assert filter_tempfile_ipynb(result.stdout) == snapshot("""\nUpdated \n`<TEMPDIR>/foo.ipynb`\n""")
-    assert filter_ids(nb.read_text()) == snapshot("""{\n "cells": [\n  {}\n ],\n "metadata": {}, \n "nbformat": 4,\n "nbformat_minor": 5\n}\n""")
+    assert filter_tempfile_ipynb(result.stdout) == snapshot("""
+Updated 
+`<TEMPDIR>/foo.ipynb`
+""")
+    assert filter_ids(nb.read_text()) == snapshot("{\n \"cells\": [\n  {}\n ],\n \"metadata\": {}, \n \"nbformat\": 4,\n \"nbformat_minor\": 5\n}")
 
 
 def test_add_prepends_script_meta(tmp_path: pathlib.Path) -> None:
@@ -187,40 +198,54 @@ def test_add_prepends_script_meta(tmp_path: pathlib.Path) -> None:
     )
     result = invoke(["add", str(path), "polars==1", "anywidget"])
     assert result.exit_code == 0
-    assert filter_tempfile_ipynb(result.stdout) == snapshot("""\nUpdated \n`<TEMPDIR>/empty.ipynb`\n""")
-    assert filter_ids(path.read_text()) == snapshot("""{\n "cells": [\n  {}\n  {}\n ],\n "metadata": {}, \n "nbformat": 4,\n "nbformat_minor": 5\n}\n""")
+    assert filter_tempfile_ipynb(result.stdout) == snapshot("""
+Updated 
+`<TEMPDIR>/empty.ipynb`
+""")
+    assert filter_ids(path.read_text()) == snapshot("{\n \"cells\": [\n  {}\n  {}\n ],\n \"metadata\": {}, \n \"nbformat\": 4,\n \"nbformat_minor\": 5\n}")
 
 
 def test_add_updates_existing_meta(tmp_path: pathlib.Path) -> None:
     path = tmp_path / "empty.ipynb"
     nb = new_notebook(
         cells=[
-            new_code_cell("""# /// script
+            new_code_cell("""
+# /// script
 # dependencies = ["numpy"]
 # requires-python = ">=3.8"
 # ///
 import numpy as np
-print('Hello, numpy!')"""),
+print('Hello, numpy!')
+""")
         ]
     )
     write_ipynb(nb, path)
     result = invoke(["add", str(path), "polars==1", "anywidget"])
     assert result.exit_code == 0
-    assert filter_tempfile_ipynb(result.stdout) == snapshot("""\nUpdated \n`<TEMPDIR>/empty.ipynb`\n""")
-    assert filter_ids(path.read_text()) == snapshot("""{\n "cells": [\n  {}\n  {}\n ],\n "metadata": {}, \n "nbformat": 4,\n "nbformat_minor": 5\n}\n""")
+    assert filter_tempfile_ipynb(result.stdout) == snapshot("""
+Updated 
+`<TEMPDIR>/empty.ipynb`
+""")
+    assert filter_ids(path.read_text()) == snapshot("{\n \"cells\": [\n  {}\n  {}\n ],\n \"metadata\": {}, \n \"nbformat\": 4,\n \"nbformat_minor\": 5\n}")
 
 
 def test_init_creates_notebook_with_inline_meta(tmp_path: pathlib.Path) -> None:
     path = tmp_path / "empty.ipynb"
     result = invoke(["init", str(path)])
     assert result.exit_code == 0
-    assert filter_tempfile_ipynb(result.stdout) == snapshot("""\nInitialized notebook at \n`<TEMPDIR>/empty.ipynb`\n""")
-    assert filter_ids(path.read_text()) == snapshot("""{\n "cells": [\n  {}\n ],\n "metadata": {}, \n "nbformat": 4,\n "nbformat_minor": 5\n}\n""")
+    assert filter_tempfile_ipynb(result.stdout) == snapshot("""
+Initialized notebook at 
+`<TEMPDIR>/empty.ipynb`
+""")
+    assert filter_ids(path.read_text()) == snapshot("{\n \"cells\": [\n  {}\n ],\n \"metadata\": {}, \n \"nbformat\": 4,\n \"nbformat_minor\": 5\n}")
 
 
 def test_init_creates_notebook_with_specific_python_version(tmp_path: pathlib.Path) -> None:
     path = tmp_path / "empty.ipynb"
     result = invoke(["init", str(path), "--python=3.8"])
     assert result.exit_code == 0
-    assert filter_tempfile_ipynb(result.stdout) == snapshot("""\nInitialized notebook at \n`<TEMPDIR>/empty.ipynb`\n""")
-    assert filter_ids(path.read_text()) == snapshot("""{\n "cells": [\n  {}\n ],\n "metadata": {}, \n "nbformat": 4,\n "nbformat_minor": 5\n}\n""")
+    assert filter_tempfile_ipynb(result.stdout) == snapshot("""
+Initialized notebook at 
+`<TEMPDIR>/empty.ipynb`
+""")
+    assert filter_ids(path.read_text()) == snapshot("{\n \"cells\": [\n  {}\n ],\n \"metadata\": {}, \n \"nbformat\": 4,\n \"nbformat_minor\": 5\n}")
