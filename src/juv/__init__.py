@@ -68,7 +68,7 @@ def init(
     """
     from ._init import init
 
-    init(path=Path(file) if file else None, python=python, packages=with_)
+    init(path=Path(file) if file else None, python=python, packages=list(with_))
 
 
 @cli.command()
@@ -89,7 +89,7 @@ def add(file: str, requirements: str | None, packages: tuple[str, ...]) -> None:
     """
     from ._add import add
 
-    add(path=Path(file), packages=packages, requirements=requirements)
+    add(path=Path(file), packages=list(packages), requirements=requirements)
     rich.print(f"Updated `[cyan]{Path(file).resolve().absolute()}[/cyan]`")
 
 
@@ -127,7 +127,7 @@ def run(
         path=Path(file),
         jupyter=jupyter,
         python=python,
-        with_args=with_args,
+        with_args=list(with_args),
     )
 
 
