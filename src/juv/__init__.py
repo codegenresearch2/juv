@@ -53,7 +53,7 @@ def info():
 def init(
     file: str | None,
     python: str | None,
-    with_: tuple[str, ...] = (),
+    with_args: tuple[str, ...] = (),
 ) -> None:
     """Initialize a new notebook.
 
@@ -63,12 +63,12 @@ def init(
         The path to the notebook file. If not provided, a new notebook will be created.
     python : str | None
         The Python version to use for the notebook.
-    with_ : tuple[str, ...]
+    with_args : tuple[str, ...]
         Additional dependencies to add to the notebook.
     """
     from ._init import init
 
-    init(path=Path(file) if file else None, python=python, packages=list(with_))
+    init(path=Path(file) if file else None, python=python, packages=list(with_args))
 
 
 @cli.command()
