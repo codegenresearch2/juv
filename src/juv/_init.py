@@ -61,6 +61,7 @@ def init(
     path: Path | None,
     python: str | None,
     packages: typing.Sequence[str] = [],
+    requirements: str | None = None,
 ) -> None:
     """Initialize a new notebook."""
     if not path:
@@ -74,8 +75,7 @@ def init(
     write_ipynb(notebook, path)
 
     if packages:
-        # Call the add function with the specified packages
         from ._add import add
-        add(path, packages)
+        add(path, packages, requirements)
 
     rich.print(f"Initialized notebook at `[cyan]{path.resolve().absolute()}[/cyan]`")
