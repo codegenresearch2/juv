@@ -53,7 +53,7 @@ def info():
 def init(
     file: str | None,
     python: str | None,
-    with_args: tuple[str, ...] = (),
+    additional_dependencies: tuple[str, ...] = (),
 ) -> None:
     """Initialize a new notebook.
 
@@ -63,12 +63,16 @@ def init(
         The path to the notebook file. If not provided, a new notebook will be created.
     python : str | None
         The Python version to use for the notebook.
-    with_args : tuple[str, ...]
+    additional_dependencies : tuple[str, ...]
         Additional dependencies to add to the notebook.
     """
     from ._init import init
 
-    init(path=Path(file) if file else None, python=python, packages=list(with_args))
+    init(
+        path=Path(file) if file else None,
+        python=python,
+        packages=list(additional_dependencies),
+    )
 
 
 @cli.command()
@@ -89,7 +93,11 @@ def add(file: str, requirements: str | None, packages: tuple[str, ...]) -> None:
     """
     from ._add import add
 
-    add(path=Path(file), packages=list(packages), requirements=requirements)
+    add(
+        path=Path(file),
+        packages=list(packages),
+        requirements=requirements,
+    )
     rich.print(f"Updated `[cyan]{Path(file).resolve().absolute()}[/cyan]`")
 
 
