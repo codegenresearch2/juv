@@ -49,14 +49,26 @@ def info():
 @cli.command()
 @click.argument("file", type=click.Path(exists=False), required=False)
 @click.option("--python", type=click.STRING, required=False)
+@click.option("--with", type=click.STRING, multiple=True, help="Additional dependencies to add to the notebook.")
 def init(
     file: str | None,
     python: str | None,
+    with_: tuple[str, ...] = (),
 ) -> None:
-    """Initialize a new notebook."""
+    """Initialize a new notebook.
+
+    Parameters
+    ----------
+    file : str | None
+        The path to the notebook file. If not provided, a new notebook will be created.
+    python : str | None
+        The Python version to use for the notebook.
+    with_ : tuple[str, ...]
+        Additional dependencies to add to the notebook.
+    """
     from ._init import init
 
-    init(path=Path(file) if file else None, python=python)
+    init(path=Path(file) if file else None, python=python, packages=with_)
 
 
 @cli.command()
@@ -64,7 +76,17 @@ def init(
 @click.option("--requirements", "-r", type=click.Path(exists=True), required=False)
 @click.argument("packages", nargs=-1)
 def add(file: str, requirements: str | None, packages: tuple[str, ...]) -> None:
-    """Add dependencies to the notebook."""
+    """Add dependencies to the notebook.
+
+    Parameters
+    ----------
+    file : str
+        The path to the notebook file.
+    requirements : str | None
+        The path to a requirements file.
+    packages : tuple[str, ...]
+        The dependencies to add to the notebook.
+    """
     from ._add import add
 
     add(path=Path(file), packages=packages, requirements=requirements)
@@ -86,7 +108,19 @@ def run(
     with_args: tuple[str, ...],
     python: str | None,
 ) -> None:
-    """Launch a notebook or script."""
+    """Launch a notebook or script.
+
+    Parameters
+    ----------
+    file : str
+        The path to the notebook or script file.
+    jupyter : str | None
+        The Jupyter frontend to use.
+    with_args : tuple[str, ...]
+        Additional arguments to pass to the `uv` command.
+    python : str | None
+        The Python version to use.
+    """
     from ._run import run
 
     run(
