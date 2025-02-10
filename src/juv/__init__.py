@@ -49,11 +49,11 @@ def info():
 @cli.command()
 @click.argument("file", type=click.Path(exists=False), required=False)
 @click.option("--python", type=click.STRING, required=False)
-@click.option("--with", type=click.STRING, multiple=True, help="Additional dependencies to add to the notebook.")
+@click.option("--with-deps", type=click.STRING, multiple=True, help="Additional dependencies to add to the notebook.")
 def init(
     file: str | None,
     python: str | None,
-    with_args: tuple[str, ...] = (),
+    with_deps: tuple[str, ...] = (),
 ) -> None:
     """Initialize a new notebook.
 
@@ -63,7 +63,7 @@ def init(
         The path to the notebook file. If not provided, a new notebook will be created.
     python : str | None
         The Python version to use for the notebook.
-    with_args : tuple[str, ...]
+    with_deps : tuple[str, ...]
         Additional dependencies to add to the notebook.
     """
     from ._init import init
@@ -71,7 +71,7 @@ def init(
     init(
         path=Path(file) if file else None,
         python=python,
-        packages=list(with_args),
+        packages=list(with_deps),
     )
 
 
@@ -108,12 +108,12 @@ def add(file: str, requirements: str | None, packages: tuple[str, ...]) -> None:
     required=False,
     help="The Jupyter frontend to use. [env: JUV_JUPYTER=]",
 )
-@click.option("--with", "with_args", type=click.STRING, multiple=True)
+@click.option("--with-deps", "with_deps", type=click.STRING, multiple=True)
 @click.option("--python", type=click.STRING, required=False)
 def run(
     file: str,
     jupyter: str | None,
-    with_args: tuple[str, ...],
+    with_deps: tuple[str, ...],
     python: str | None,
 ) -> None:
     """Launch a notebook or script.
@@ -124,8 +124,8 @@ def run(
         The path to the notebook or script file.
     jupyter : str | None
         The Jupyter frontend to use.
-    with_args : tuple[str, ...]
-        Additional arguments to pass to the `uv` command.
+    with_deps : tuple[str, ...]
+        Additional dependencies to add to the notebook.
     python : str | None
         The Python version to use.
     """
@@ -135,7 +135,7 @@ def run(
         path=Path(file),
         jupyter=jupyter,
         python=python,
-        with_args=list(with_args),
+        with_args=list(with_deps),
     )
 
 
