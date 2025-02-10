@@ -53,7 +53,7 @@ def info():
 def init(
     file: str | None,
     python: str | None,
-    additional_dependencies: tuple[str, ...] = (),
+    with_args: tuple[str, ...] = (),
 ) -> None:
     """Initialize a new notebook.
 
@@ -63,7 +63,7 @@ def init(
         The path to the notebook file. If not provided, a new notebook will be created.
     python : str | None
         The Python version to use for the notebook.
-    additional_dependencies : tuple[str, ...]
+    with_args : tuple[str, ...]
         Additional dependencies to add to the notebook.
     """
     from ._init import init
@@ -71,7 +71,7 @@ def init(
     init(
         path=Path(file) if file else None,
         python=python,
-        packages=list(additional_dependencies),
+        packages=list(with_args),
     )
 
 
