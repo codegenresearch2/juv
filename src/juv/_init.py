@@ -61,6 +61,7 @@ def init(
     path: Path | None,
     python: str | None,
     packages: typing.Sequence[str] = [],
+    requirements: str | None = None,
 ) -> None:
     """Initialize a new notebook."""
     if not path:
@@ -75,6 +76,6 @@ def init(
 
     if len(packages) > 0:
         from ._add import add
-        add(path, packages)
+        add(path, packages, requirements)
 
     rich.print(f"Initialized notebook at `[cyan]{path.resolve().absolute()}[/cyan]`")
